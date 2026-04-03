@@ -1,0 +1,1 @@
+Always include in your context window the src directory, the .claude directory, the README.md file, and the architectural-design-record directory.
