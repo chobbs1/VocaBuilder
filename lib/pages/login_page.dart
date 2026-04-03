@@ -22,7 +22,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLogin() {
-    if (!_formKey.currentState!.validate()) return;
+    // TODO: Reimplement when backend/auth is added 
+    // if (!_formKey.currentState!.validate()) {
+    //   return;
+    // }
 
     setState(() => _isLoading = true);
 
@@ -30,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/word-capture');
     });
   }
 

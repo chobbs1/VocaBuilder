@@ -11,26 +11,44 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:voca_builder/main.dart';
 
 void main() {
-  testWidgets('Login page renders correctly', (WidgetTester tester) async {
+  testWidgets('Word Capture page renders correctly', (WidgetTester tester) async {
     await tester.pumpWidget(const VocaBuilderApp());
 
-    // Verify login page elements are present
-    expect(find.text('VoCa Builder'), findsOneWidget);
-    expect(find.text('Email'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
-    expect(find.text('Login'), findsOneWidget);
-    expect(find.text('Sign Up'), findsOneWidget);
+    // Verify Word Capture page elements are present
+    expect(find.text('Capture Word'), findsOneWidget);
+    expect(find.text('Word'), findsOneWidget);
+    expect(find.text('Associations (optional)'), findsOneWidget);
+    expect(find.text('Add to WordBase'), findsOneWidget);
+    expect(find.text('Your WordBase'), findsOneWidget);
   });
 
-  testWidgets('Login validates empty fields', (WidgetTester tester) async {
+  testWidgets('Word Capture validates empty word', (WidgetTester tester) async {
     await tester.pumpWidget(const VocaBuilderApp());
 
-    // Tap login without entering anything
-    await tester.tap(find.widgetWithText(FilledButton, 'Login'));
+    // Tap add without entering anything
+    await tester.tap(find.text('Add to WordBase'));
     await tester.pump();
 
-    // Expect validation errors
-    expect(find.text('Please enter your email'), findsOneWidget);
-    expect(find.text('Please enter your password'), findsOneWidget);
+    // Expect validation error
+    expect(find.text('Please enter a word'), findsOneWidget);
+  });
+
+  testWidgets('Word Capture adds a word', (WidgetTester tester) async {
+    await tester.pumpWidget(const VocaBuilderApp());
+
+    // Enter a word
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Enter a word'),
+      'ephemeral',
+    );
+
+    // Tap add
+    await tester.tap(find.text('Add to WordBase'));
+    await tester.pump();
+
+    // Word should appear in the list
+    expect(find.text('ephemeral'), findsOneWidget);
+    // Count chip should show 1
+    expect(find.text('1'), findsOneWidget);
   });
 }
