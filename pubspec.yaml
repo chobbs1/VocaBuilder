@@ -1,7 +1,5 @@
 name: voca_builder
-description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
+description: "VoCa Builder is a vocabulary learning app that helps users build their vocabulary effectively. It provides a user-friendly interface for creating and managing vocabulary lists, as well as various features to enhance the learning experience."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.

@@ -1,11 +1,11 @@
 {
-    "name": "voca_builder",
-    "short_name": "voca_builder",
+    "name": "VoCa Builder",
+    "short_name": "VoCa Builder",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Expand and consolidate your vocabulary!",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
