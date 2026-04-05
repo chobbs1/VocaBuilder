@@ -1,12 +1,36 @@
+import 'dart:convert';
+
+import 'package:amplify_api/amplify_api.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'models/word_base.dart';
 // TO RE-ENABLE LOGIN: uncomment the following import:
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/word_capture_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _configureAmplify();
   runApp(const VocaBuilderApp());
+}
+
+Future<void> _configureAmplify() async {
+  try {
+    final api = AmplifyAPI();
+    await Amplify.addPlugins([api]);
+
+    // Load the amplify_outputs.json from the app assets.
+    final jsonString = await rootBundle.loadString('amplify_outputs.json');
+    final config = jsonDecode(jsonString) as Map<String, dynamic>;
+    await Amplify.configure(jsonEncode(config));
+
+    safePrint('Successfully configured Amplify');
+  } on Exception catch (e) {
+    safePrint('Error configuring Amplify: $e');
+  }
 }
 
 class VocaBuilderApp extends StatefulWidget {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/word_entry.dart';
 import '../models/word_base.dart';
+import '../services/api_service.dart';
 
 /// Word Capture page — allows the user to add a new word to their WordBase.
 ///
@@ -27,6 +28,7 @@ class _WordCapturePageState extends State<WordCapturePage> {
   final _formKey = GlobalKey<FormState>();
   final _wordController = TextEditingController();
   final _associationsController = TextEditingController();
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -35,40 +37,71 @@ class _WordCapturePageState extends State<WordCapturePage> {
     super.dispose();
   }
 
-  void _handleSubmit() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _handleSubmit() async {
+    debugPrint('[_handleSubmit] called');
+
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('[_handleSubmit] form validation failed');
+      return;
+    }
 
     final word = _wordController.text.trim();
+    debugPrint('[_handleSubmit] word="$word"');
 
     if (widget.wordBase.contains(word)) {
+      debugPrint('[_handleSubmit] word already in WordBase');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('"$word" is already in your WordBase.')),
       );
       return;
     }
 
-    final entry = WordEntry(
-      word: word,
-      // Definition and crossword clues are NOT user input per the architecture.
-      // They will be populated from a dictionary API / clue source in future.
-      associations: _associationsController.text.trim().isNotEmpty
-          ? _associationsController.text.trim()
-          : null,
-    );
+    setState(() => _isSubmitting = true);
 
-    widget.wordBase.add(entry);
+    try {
+      // Send the word to the backend via GraphQL API.
+      debugPrint('[_handleSubmit] calling ApiService.createWordEntry...');
+      final result = await ApiService.createWordEntry(word: word);
+      debugPrint('[_handleSubmit] API response: $result');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added "$word" to your WordBase!')),
-    );
+      // Add to local WordBase on success.
+      final entry = WordEntry(
+        word: word,
+        // Definition and crossword clues are NOT user input per the architecture.
+        // They will be populated from a dictionary API / clue source in future.
+        associations: _associationsController.text.trim().isNotEmpty
+            ? _associationsController.text.trim()
+            : null,
+      );
 
-    // Clear the form for the next word
-    _wordController.clear();
-    _associationsController.clear();
-    _formKey.currentState!.reset();
+      widget.wordBase.add(entry);
+      debugPrint('[_handleSubmit] added to local WordBase');
 
-    // Refresh the word list display
-    setState(() {});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Added "$word" to your WordBase!')),
+        );
+      }
+
+      // Clear the form for the next word
+      _wordController.clear();
+      _associationsController.clear();
+      _formKey.currentState!.reset();
+    } on Exception catch (e, stackTrace) {
+      debugPrint('[_handleSubmit] ERROR: $e');
+      debugPrint('[_handleSubmit] STACKTRACE: $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save "$word": $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+      debugPrint('[_handleSubmit] done');
+    }
   }
 
   @override
@@ -128,9 +161,18 @@ class _WordCapturePageState extends State<WordCapturePage> {
                   const SizedBox(height: 16),
 
                   FilledButton.icon(
-                    onPressed: _handleSubmit,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add to WordBase'),
+                    onPressed: _isSubmitting ? null : _handleSubmit,
+                    icon: _isSubmitting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.add),
+                    label: Text(_isSubmitting ? 'Saving...' : 'Add to WordBase'),
                     style: FilledButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),

@@ -62,3 +62,7 @@ pubspec.lock
 # Generated
 *.g.dart
 *.freezed.dart
+
+# AWS Amplify
+amplify_outputs.json
+amplify_outputs.dart
