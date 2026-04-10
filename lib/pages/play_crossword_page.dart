@@ -37,33 +37,53 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
   }
 
   void _onCellTap(int row, int col) {
+    debugPrint('[_onCellTap] row=$row col=$col');
     setState(() {
       _puzzle.setFocus(row, col);
     });
     // Reset the hidden text field and request focus so the keyboard opens.
-    _inputController.clear();
+    _inputController.text = ' '; // seed with a character so backspace has something to delete
+    _inputController.selection = const TextSelection.collapsed(offset: 1);
     _inputFocusNode.requestFocus();
+    debugPrint('[_onCellTap] focus=${_puzzle.focusRow},${_puzzle.focusCol} dir=${_puzzle.activeDirection}');
   }
 
-  /// Called whenever the hidden TextField value changes.
-  /// We grab the last character typed and feed it into the puzzle.
-  void _onTextChanged(String value) {
-    if (value.isEmpty) {
-      // User pressed backspace.
+  /// Handles raw key events to catch backspace reliably.
+  void _onKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return;
+
+    debugPrint('[_onKeyEvent] key=${event.logicalKey.keyLabel}');
+
+    if (event.logicalKey == LogicalKeyboardKey.backspace) {
+      debugPrint('[_onKeyEvent] BACKSPACE');
       setState(() {
         _puzzle.deleteLetter();
       });
-    } else {
-      // Take only the last character entered.
-      final letter = value[value.length - 1];
+      // Re-seed so the next backspace still has something to delete.
+      _inputController.text = ' ';
+      _inputController.selection = const TextSelection.collapsed(offset: 1);
+      debugPrint('[_onKeyEvent] after delete: focus=${_puzzle.focusRow},${_puzzle.focusCol}');
+    }
+  }
+
+  /// Called whenever the hidden TextField value changes (letter input).
+  void _onTextChanged(String value) {
+    debugPrint('[_onTextChanged] value="$value" (length=${value.length})');
+    // Extract the newly typed character (ignore the seed space).
+    final cleaned = value.replaceAll(' ', '');
+    if (cleaned.isNotEmpty) {
+      final letter = cleaned[cleaned.length - 1];
+      debugPrint('[_onTextChanged] letter="$letter"');
       if (RegExp(r'[a-zA-Z]').hasMatch(letter)) {
         setState(() {
           _puzzle.enterLetter(letter);
         });
+        debugPrint('[_onTextChanged] after enter: focus=${_puzzle.focusRow},${_puzzle.focusCol}');
       }
     }
-    // Reset the controller so the next keystroke is cleanly detected.
-    _inputController.clear();
+    // Re-seed with a single space so backspace always has something to act on.
+    _inputController.text = ' ';
+    _inputController.selection = const TextSelection.collapsed(offset: 1);
   }
 
   @override
@@ -103,20 +123,21 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
             child: SizedBox(
               width: 1,
               height: 1,
-              child: TextField(
-                focusNode: _inputFocusNode,
-                controller: _inputController,
-                autofocus: false,
-                enableSuggestions: false,
-                autocorrect: false,
-                keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.characters,
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z]')),
-                ],
-                onChanged: _onTextChanged,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
+              child: KeyboardListener(
+                focusNode: FocusNode(), // passive listener
+                onKeyEvent: _onKeyEvent,
+                child: TextField(
+                  focusNode: _inputFocusNode,
+                  controller: _inputController,
+                  autofocus: false,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  keyboardType: TextInputType.text,
+                  textCapitalization: TextCapitalization.characters,
+                  onChanged: _onTextChanged,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
             ),
