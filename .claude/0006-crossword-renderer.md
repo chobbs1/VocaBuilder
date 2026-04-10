@@ -1,0 +1,1 @@
+Give me a clear todo list every time you're prompted of what you're about to do and the line numbers this will affect

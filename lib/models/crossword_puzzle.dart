@@ -68,19 +68,58 @@ class CrosswordPuzzle {
   /// Whether a specific cell is the currently focused cell.
   bool isFocused(int row, int col) => focusRow == row && focusCol == col;
 
-  /// Set focus to [row],[col]. If already focused, toggle direction.
+  /// Set focus to [row],[col]. If already focused, toggle direction —
+  /// but only if the cell is at an intersection (part of both an across
+  /// and a down word). Otherwise tapping the same cell is a no-op.
   void setFocus(int row, int col) {
     if (grid[row][col].isBlock) return;
 
     if (isFocused(row, col)) {
-      // Tapping the same cell toggles across ↔ down.
-      activeDirection = activeDirection == ClueDirection.across
-          ? ClueDirection.down
-          : ClueDirection.across;
+      // Only toggle if this cell participates in both directions.
+      if (_isIntersection(row, col)) {
+        activeDirection = activeDirection == ClueDirection.across
+            ? ClueDirection.down
+            : ClueDirection.across;
+      }
     } else {
       focusRow = row;
       focusCol = col;
+
+      // Auto-switch direction to match the new cell's word.
+      // If the cell only belongs to one direction, snap to it.
+      final hasHorizontal =
+          (col > 0 && grid[row][col - 1].isLetterCell) ||
+          (col + 1 < cols && grid[row][col + 1].isLetterCell);
+      final hasVertical =
+          (row > 0 && grid[row - 1][col].isLetterCell) ||
+          (row + 1 < rows && grid[row + 1][col].isLetterCell);
+
+      if (hasHorizontal && !hasVertical) {
+        activeDirection = ClueDirection.across;
+      } else if (hasVertical && !hasHorizontal) {
+        activeDirection = ClueDirection.down;
+      }
+      // If both (intersection) — keep the current activeDirection.
     }
+  }
+
+  /// Returns true if the cell at [row],[col] is part of both an across
+  /// word (≥2 consecutive horizontal letter cells) and a down word
+  /// (≥2 consecutive vertical letter cells).
+  bool _isIntersection(int row, int col) {
+    if (grid[row][col].isBlock) return false;
+
+    // Check horizontal: at least one neighbour left or right.
+    final hasHorizontal =
+        (col > 0 && grid[row][col - 1].isLetterCell) ||
+        (col + 1 < cols && grid[row][col + 1].isLetterCell);
+
+    // Check vertical: at least one neighbour above or below.
+    final hasVertical =
+        (row > 0 && grid[row - 1][col].isLetterCell) ||
+        (row + 1 < rows && grid[row + 1][col].isLetterCell);
+
+    return hasHorizontal && hasVertical;
   }
 
   /// Returns the list of (row, col) pairs that belong to the same word as
