@@ -232,12 +232,14 @@ class CrosswordPuzzle {
 
   /// Move focus forward to the next **empty** letter cell in the active
   /// direction, skipping over cells that already have input.
-  /// Stops at the end of the word if no empty cell is found.
+  /// If the current word is complete, jumps to the first empty cell of
+  /// the next clue (same direction first, then the other direction).
   void _advanceFocus() {
     if (focusRow == null || focusCol == null) return;
     int r = focusRow!;
     int c = focusCol!;
 
+    // Try to find the next empty cell within the current word.
     while (true) {
       if (activeDirection == ClueDirection.across) {
         c++;
@@ -256,8 +258,10 @@ class CrosswordPuzzle {
       }
     }
 
-    // No empty cell ahead — stay on the cell right after the one we typed in.
-    // (Reset to one step forward from original position.)
+    // Current word is complete — jump to the next clue's first empty cell.
+    if (_advanceToNextClue()) return;
+
+    // Fallback: just move one cell forward from where we were.
     r = focusRow!;
     c = focusCol!;
     if (activeDirection == ClueDirection.across) {
@@ -269,6 +273,81 @@ class CrosswordPuzzle {
       focusRow = r;
       focusCol = c;
     }
+  }
+
+  /// Finds the next clue with an empty cell and moves focus there.
+  ///
+  /// Searches the current direction's clues first (after the active clue),
+  /// then wraps to the other direction. Returns true if focus was moved.
+  bool _advanceToNextClue() {
+    final currentClue = activeClue;
+
+    // Build an ordered list: remaining clues in current direction,
+    // then all clues in the other direction.
+    final sameDirClues = activeDirection == ClueDirection.across
+        ? acrossClues
+        : downClues;
+    final otherDirClues = activeDirection == ClueDirection.across
+        ? downClues
+        : acrossClues;
+    final otherDirection = activeDirection == ClueDirection.across
+        ? ClueDirection.down
+        : ClueDirection.across;
+
+    // Find the index of the current clue in its list.
+    int currentIndex = -1;
+    if (currentClue != null) {
+      currentIndex = sameDirClues.indexWhere((c) => c.number == currentClue.number);
+    }
+
+    // Search remaining clues in the same direction.
+    for (int i = currentIndex + 1; i < sameDirClues.length; i++) {
+      final empty = _firstEmptyInClue(sameDirClues[i]);
+      if (empty != null) {
+        focusRow = empty.$1;
+        focusCol = empty.$2;
+        return true;
+      }
+    }
+
+    // Search all clues in the other direction.
+    for (final clue in otherDirClues) {
+      final empty = _firstEmptyInClue(clue);
+      if (empty != null) {
+        focusRow = empty.$1;
+        focusCol = empty.$2;
+        activeDirection = otherDirection;
+        return true;
+      }
+    }
+
+    // Wrap around: search same direction from the beginning.
+    for (int i = 0; i <= currentIndex && i < sameDirClues.length; i++) {
+      final empty = _firstEmptyInClue(sameDirClues[i]);
+      if (empty != null) {
+        focusRow = empty.$1;
+        focusCol = empty.$2;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Returns the (row, col) of the first empty cell in a clue, or null.
+  (int, int)? _firstEmptyInClue(CrosswordClue clue) {
+    for (int i = 0; i < clue.length; i++) {
+      final r = clue.direction == ClueDirection.across
+          ? clue.startRow
+          : clue.startRow + i;
+      final c = clue.direction == ClueDirection.across
+          ? clue.startCol + i
+          : clue.startCol;
+      if (grid[r][c].userInput == null) {
+        return (r, c);
+      }
+    }
+    return null;
   }
 
   /// Move focus backward by one cell in the active direction.
