@@ -225,28 +225,29 @@ class CrosswordPuzzle {
 
   // ───────────────────────── Demo puzzle ─────────────────────────
 
-  /// Creates a small hard-coded 10×10 demo puzzle for development.
+  /// Creates a small hard-coded 9×9 demo puzzle for development.
+  /// 
   ///
   /// Legend:  `.` = block,  letter = solution.
   factory CrosswordPuzzle.demo() {
-    //            0    1    2    3    4    5    6    7    8    9
+    const size = 9;
+    //            0    1    2    3    4    5    6    7    8
     final layout = [
-      'FLUTTER...', // row 0
-      'L..A......', // row 1
-      'A..B......', // row 2
-      'WORDBASE..', // row 3
-      'S..E......', // row 4
-      '...CLUE...', // row 5
-      '..........', // row 6  (all blocks)
-      'VOCAB.....', // row 7
-      'O.........', // row 8
-      'C.........', // row 9
+      'FLUTTER..', // row 0
+      'L..A.....', // row 1
+      'A..B.....', // row 2
+      'WORDBASE.', // row 3
+      'S..E.....', // row 4
+      '...CLUE..', // row 5
+      '.........', // row 6  (all blocks)
+      'VOCAB....', // row 7
+      'O........', // row 8
     ];
 
     final grid = <List<CrosswordCell>>[];
-    for (int r = 0; r < 10; r++) {
+    for (int r = 0; r < size; r++) {
       final row = <CrosswordCell>[];
-      for (int c = 0; c < 10; c++) {
+      for (int c = 0; c < size; c++) {
         final ch = layout[r][c];
         if (ch == '.') {
           row.add(CrosswordCell(isBlock: true));
@@ -262,18 +263,18 @@ class CrosswordPuzzle {
     final acrossClues = <CrosswordClue>[];
     final downClues = <CrosswordClue>[];
 
-    for (int r = 0; r < 10; r++) {
-      for (int c = 0; c < 10; c++) {
+    for (int r = 0; r < size; r++) {
+      for (int c = 0; c < size; c++) {
         if (grid[r][c].isBlock) continue;
 
         final startsAcross =
             (c == 0 || grid[r][c - 1].isBlock) &&
-            c + 1 < 10 &&
+            c + 1 < size &&
             grid[r][c + 1].isLetterCell;
 
         final startsDown =
             (r == 0 || grid[r - 1][c].isBlock) &&
-            r + 1 < 10 &&
+            r + 1 < size &&
             grid[r + 1][c].isLetterCell;
 
         if (startsAcross || startsDown) {
@@ -289,7 +290,7 @@ class CrosswordPuzzle {
 
           if (startsAcross) {
             int len = 0;
-            for (int cc = c; cc < 10 && grid[r][cc].isLetterCell; cc++) {
+            for (int cc = c; cc < size && grid[r][cc].isLetterCell; cc++) {
               len++;
             }
             acrossClues.add(CrosswordClue(
@@ -303,7 +304,7 @@ class CrosswordPuzzle {
           }
           if (startsDown) {
             int len = 0;
-            for (int rr = r; rr < 10 && grid[rr][c].isLetterCell; rr++) {
+            for (int rr = r; rr < size && grid[rr][c].isLetterCell; rr++) {
               len++;
             }
             downClues.add(CrosswordClue(
@@ -320,8 +321,8 @@ class CrosswordPuzzle {
     }
 
     return CrosswordPuzzle(
-      rows: 10,
-      cols: 10,
+      rows: size,
+      cols: size,
       grid: grid,
       acrossClues: acrossClues,
       downClues: downClues,
