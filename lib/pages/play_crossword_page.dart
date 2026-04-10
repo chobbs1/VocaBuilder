@@ -79,11 +79,71 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
           _puzzle.enterLetter(letter);
         });
         debugPrint('[_onTextChanged] after enter: focus=${_puzzle.focusRow},${_puzzle.focusCol}');
+
+        // Auto-check when the grid is fully filled.
+        if (_puzzle.isFull) {
+          _puzzle.checkAll();
+          if (_puzzle.isAllCorrect) {
+            // Dismiss keyboard and show victory dialog.
+            _inputFocusNode.unfocus();
+            _showVictoryDialog();
+          } else {
+            setState(() {}); // Refresh to show incorrect markers.
+          }
+        }
       }
     }
     // Re-seed with a single space so backspace always has something to act on.
     _inputController.text = ' ';
     _inputController.selection = const TextSelection.collapsed(offset: 1);
+  }
+
+  void _showVictoryDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.emoji_events, color: Colors.amber, size: 32),
+            SizedBox(width: 12),
+            Text('Congratulations!'),
+          ],
+        ),
+        content: const Text(
+          'You solved the crossword! 🎉',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // close dialog
+              _resetPuzzle();
+            },
+            child: const Text('Play Again'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // close dialog
+              // Navigate back to Capture Word (index 0 of MainShell).
+              // The MainShell is the parent, so we pop to it or
+              // use the bottom nav. Simplest: pop to root.
+              Navigator.of(this.context).popUntil((route) => route.isFirst);
+              Navigator.of(this.context).pushReplacementNamed('/word-capture');
+            },
+            child: const Text('Back to WordBase'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetPuzzle() {
+    setState(() {
+      _puzzle.clearAll();
+      _puzzle.focusRow = null;
+      _puzzle.focusCol = null;
+    });
   }
 
   @override

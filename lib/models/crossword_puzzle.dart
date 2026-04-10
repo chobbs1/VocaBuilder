@@ -368,6 +368,28 @@ class CrosswordPuzzle {
     }
   }
 
+  // ───────────────────────── Completion checks ─────────────────────────
+
+  /// Whether every letter cell has user input (the grid is fully filled).
+  bool get isFull {
+    for (final row in grid) {
+      for (final cell in row) {
+        if (cell.isLetterCell && cell.userInput == null) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Whether every letter cell's input matches its solution.
+  bool get isAllCorrect {
+    for (final row in grid) {
+      for (final cell in row) {
+        if (cell.isLetterCell && !cell.isCorrect) return false;
+      }
+    }
+    return true;
+  }
+
   // ───────────────────────── Check / Reveal ─────────────────────────
 
   /// Check all filled cells and mark them correct or incorrect.
