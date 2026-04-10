@@ -164,21 +164,34 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
                   ),
                 ),
 
-                // ── Active clue hint ──
-                if (_puzzle.focusRow != null && _puzzle.focusCol != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
+                // ── Active clue ──
+                Builder(builder: (context) {
+                  if (_puzzle.focusRow == null ||
+                      _puzzle.focusCol == null) {
+                    return const SizedBox.shrink();
+                  }
+                  final clue = _puzzle.activeClue;
+                  final direction =
                       _puzzle.activeDirection == ClueDirection.across
                           ? 'Across'
-                          : 'Down',
+                          : 'Down';
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 10.0),
+                    color: colorScheme.primaryContainer,
+                    child: Text(
+                      clue != null
+                          ? '${clue.number} $direction: ${clue.text}'
+                          : direction,
                       style:
-                          Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.bold,
+                          Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.w600,
                               ),
                     ),
-                  ),
+                  );
+                }),
               ],
             ),
           ),

@@ -123,6 +123,27 @@ class CrosswordPuzzle {
     return activeWordCells.contains((row, col));
   }
 
+  /// Returns the [CrosswordClue] for the currently focused cell and
+  /// [activeDirection], or `null` if no clue is found.
+  CrosswordClue? get activeClue {
+    final cells = activeWordCells;
+    if (cells.isEmpty) return null;
+
+    // The clue starts at the first cell in the active word.
+    final (startRow, startCol) = cells.first;
+
+    final clues = activeDirection == ClueDirection.across
+        ? acrossClues
+        : downClues;
+
+    for (final clue in clues) {
+      if (clue.startRow == startRow && clue.startCol == startCol) {
+        return clue;
+      }
+    }
+    return null;
+  }
+
   // ───────────────────────── Input helpers ─────────────────────────
 
   /// Enter a letter into the focused cell and advance to the next cell
