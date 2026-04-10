@@ -8,8 +8,7 @@ import 'package:flutter/services.dart';
 import 'models/word_base.dart';
 // TO RE-ENABLE LOGIN: uncomment the following import:
 import 'pages/login_page.dart';
-import 'pages/home_page.dart';
-import 'pages/word_capture_page.dart';
+import 'pages/main_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +60,7 @@ class _VocaBuilderAppState extends State<VocaBuilderApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/word-capture': (context) => WordCapturePage(wordBase: _wordBase),
+        '/word-capture': (context) => MainShell(wordBase: _wordBase),
       },
     );
   }
