@@ -69,8 +69,10 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Play Crossword'),
         actions: [
@@ -120,62 +122,65 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
             ),
           ),
 
-          // Main content
-          Column(
-            children: [
-              // ── Crossword grid ──
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: AspectRatio(
-                  aspectRatio: 1, // square grid
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cellSize = constraints.maxWidth / _puzzle.cols;
-                      return GridView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _puzzle.cols,
-                        ),
-                        itemCount: _puzzle.rows * _puzzle.cols,
-                        itemBuilder: (context, index) {
-                          final row = index ~/ _puzzle.cols;
-                          final col = index % _puzzle.cols;
-                          final cell = _puzzle.grid[row][col];
-
-                          return _CrosswordCellWidget(
-                            cell: cell,
-                            cellSize: cellSize,
-                            isFocused: _puzzle.isFocused(row, col),
-                            isInActiveWord:
-                                _puzzle.isInActiveWord(row, col),
-                            colorScheme: colorScheme,
-                            onTap: () => _onCellTap(row, col),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-              // ── Active clue hint ──
-              if (_puzzle.focusRow != null && _puzzle.focusCol != null)
+          // Main content — scrollable so the grid moves above the keyboard.
+          SingleChildScrollView(
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: Column(
+              children: [
+                // ── Crossword grid ──
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    _puzzle.activeDirection == ClueDirection.across
-                        ? 'Across'
-                        : 'Down',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: AspectRatio(
+                    aspectRatio: 1, // square grid
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final cellSize =
+                            constraints.maxWidth / _puzzle.cols;
+                        return GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: _puzzle.cols,
+                          ),
+                          itemCount: _puzzle.rows * _puzzle.cols,
+                          itemBuilder: (context, index) {
+                            final row = index ~/ _puzzle.cols;
+                            final col = index % _puzzle.cols;
+                            final cell = _puzzle.grid[row][col];
+
+                            return _CrosswordCellWidget(
+                              cell: cell,
+                              cellSize: cellSize,
+                              isFocused: _puzzle.isFocused(row, col),
+                              isInActiveWord:
+                                  _puzzle.isInActiveWord(row, col),
+                              colorScheme: colorScheme,
+                              onTap: () => _onCellTap(row, col),
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                 ),
 
-              const Spacer(),
-            ],
+                // ── Active clue hint ──
+                if (_puzzle.focusRow != null && _puzzle.focusCol != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      _puzzle.activeDirection == ClueDirection.across
+                          ? 'Across'
+                          : 'Down',
+                      style:
+                          Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
