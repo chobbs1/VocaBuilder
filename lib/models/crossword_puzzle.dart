@@ -230,18 +230,41 @@ class CrosswordPuzzle {
     }
   }
 
-  /// Move focus forward by one cell in the active direction.
+  /// Move focus forward to the next **empty** letter cell in the active
+  /// direction, skipping over cells that already have input.
+  /// Stops at the end of the word if no empty cell is found.
   void _advanceFocus() {
     if (focusRow == null || focusCol == null) return;
     int r = focusRow!;
     int c = focusCol!;
 
+    while (true) {
+      if (activeDirection == ClueDirection.across) {
+        c++;
+      } else {
+        r++;
+      }
+
+      // Stop if we've left the grid or hit a block.
+      if (r >= rows || c >= cols || grid[r][c].isBlock) break;
+
+      // Land on the first empty cell.
+      if (grid[r][c].userInput == null) {
+        focusRow = r;
+        focusCol = c;
+        return;
+      }
+    }
+
+    // No empty cell ahead — stay on the cell right after the one we typed in.
+    // (Reset to one step forward from original position.)
+    r = focusRow!;
+    c = focusCol!;
     if (activeDirection == ClueDirection.across) {
       c++;
     } else {
       r++;
     }
-
     if (r < rows && c < cols && grid[r][c].isLetterCell) {
       focusRow = r;
       focusCol = c;
