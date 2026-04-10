@@ -122,78 +122,84 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
             ),
           ),
 
-          // Main content — scrollable so the grid moves above the keyboard.
-          SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: bottomInset),
-            child: Column(
-              children: [
-                // ── Crossword grid ──
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: AspectRatio(
-                    aspectRatio: 1, // square grid
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final cellSize =
-                            constraints.maxWidth / _puzzle.cols;
-                        return GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: _puzzle.cols,
-                          ),
-                          itemCount: _puzzle.rows * _puzzle.cols,
-                          itemBuilder: (context, index) {
-                            final row = index ~/ _puzzle.cols;
-                            final col = index % _puzzle.cols;
-                            final cell = _puzzle.grid[row][col];
+          // Main content — sized to fit above the keyboard.
+          Column(
+            children: [
+              // ── Active clue (top) ──
+              Builder(builder: (context) {
+                if (_puzzle.focusRow == null ||
+                    _puzzle.focusCol == null) {
+                  return const SizedBox.shrink();
+                }
+                final clue = _puzzle.activeClue;
+                final direction =
+                    _puzzle.activeDirection == ClueDirection.across
+                        ? 'Across'
+                        : 'Down';
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 10.0),
+                  color: colorScheme.primaryContainer,
+                  child: Text(
+                    clue != null
+                        ? '${clue.number} $direction: ${clue.text}'
+                        : direction,
+                    style:
+                        Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
+                            ),
+                  ),
+                );
+              }),
 
-                            return _CrosswordCellWidget(
-                              cell: cell,
-                              cellSize: cellSize,
-                              isFocused: _puzzle.isFocused(row, col),
-                              isInActiveWord:
-                                  _puzzle.isInActiveWord(row, col),
-                              colorScheme: colorScheme,
-                              onTap: () => _onCellTap(row, col),
-                            );
-                          },
-                        );
-                      },
+              // ── Crossword grid ──
+              // Expanded so the grid fills whatever space remains
+              // above the keyboard, keeping everything visible.
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      8.0, 8.0, 8.0, 8.0 + bottomInset),
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final cellSize =
+                              constraints.maxWidth / _puzzle.cols;
+                          return GridView.builder(
+                            physics:
+                                const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: _puzzle.cols,
+                            ),
+                            itemCount: _puzzle.rows * _puzzle.cols,
+                            itemBuilder: (context, index) {
+                              final row = index ~/ _puzzle.cols;
+                              final col = index % _puzzle.cols;
+                              final cell = _puzzle.grid[row][col];
+
+                              return _CrosswordCellWidget(
+                                cell: cell,
+                                cellSize: cellSize,
+                                isFocused:
+                                    _puzzle.isFocused(row, col),
+                                isInActiveWord:
+                                    _puzzle.isInActiveWord(row, col),
+                                colorScheme: colorScheme,
+                                onTap: () => _onCellTap(row, col),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-
-                // ── Active clue ──
-                Builder(builder: (context) {
-                  if (_puzzle.focusRow == null ||
-                      _puzzle.focusCol == null) {
-                    return const SizedBox.shrink();
-                  }
-                  final clue = _puzzle.activeClue;
-                  final direction =
-                      _puzzle.activeDirection == ClueDirection.across
-                          ? 'Across'
-                          : 'Down';
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 10.0),
-                    color: colorScheme.primaryContainer,
-                    child: Text(
-                      clue != null
-                          ? '${clue.number} $direction: ${clue.text}'
-                          : direction,
-                      style:
-                          Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onPrimaryContainer,
-                                fontWeight: FontWeight.w600,
-                              ),
-                    ),
-                  );
-                }),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
