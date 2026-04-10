@@ -23,6 +23,25 @@ class CrosswordClue {
   });
 }
 
+/// A word↔clue pair with its grid position.
+///
+/// Used as input to [CrosswordPuzzle.generateLayout] to build the
+/// crossword grid. The direction (across/down) is determined by which
+/// list the entry is placed in.
+class ClueEntry {
+  final String word;
+  final String clue;
+  final int startRow;
+  final int startCol;
+
+  const ClueEntry({
+    required this.word,
+    required this.clue,
+    required this.startRow,
+    required this.startCol,
+  });
+}
+
 /// Holds the full state of a crossword puzzle.
 ///
 /// The grid is [rows] × [cols] (default 10×10) of [CrosswordCell] objects.
@@ -283,26 +302,86 @@ class CrosswordPuzzle {
     }
   }
 
+  // ───────────────────────── Layout generator ─────────────────────────
+
+  /// Generates a layout string array and a clue text lookup from two
+  /// typed [ClueEntry] lists.
+  ///
+  /// [size] is the grid dimension (size × size).
+  ///
+  /// Returns a record of `(layout, clueTexts)` where:
+  ///   - `layout` is a `List<String>` of length [size], each string of
+  ///     length [size], with letters for filled cells and `.` for blocks.
+  ///   - `clueTexts` maps `(row, col, ClueDirection)` → clue text.
+  static ({
+    List<String> layout,
+    Map<(int, int, ClueDirection), String> clueTexts,
+  }) generateLayout({
+    required int size,
+    required List<ClueEntry> across,
+    required List<ClueEntry> down,
+  }) {
+    // Start with an all-blocks grid.
+    final grid = List.generate(size, (_) => List.filled(size, '.'));
+
+    // Place across words.
+    for (final entry in across) {
+      for (int i = 0; i < entry.word.length; i++) {
+        grid[entry.startRow][entry.startCol + i] = entry.word[i];
+      }
+    }
+
+    // Place down words.
+    for (final entry in down) {
+      for (int i = 0; i < entry.word.length; i++) {
+        grid[entry.startRow + i][entry.startCol] = entry.word[i];
+      }
+    }
+
+    // Build layout strings.
+    final layout = grid.map((row) => row.join()).toList();
+
+    // Build clue text lookup.
+    final clueTexts = <(int, int, ClueDirection), String>{};
+    for (final entry in across) {
+      clueTexts[(entry.startRow, entry.startCol, ClueDirection.across)] =
+          entry.clue;
+    }
+    for (final entry in down) {
+      clueTexts[(entry.startRow, entry.startCol, ClueDirection.down)] =
+          entry.clue;
+    }
+
+    return (layout: layout, clueTexts: clueTexts);
+  }
+
   // ───────────────────────── Demo puzzle ─────────────────────────
 
   /// Creates a small hard-coded 9×9 demo puzzle for development.
-  /// 
   ///
-  /// Legend:  `.` = block,  letter = solution.
+  /// Word↔clue pairs are defined in one clear list, and
+  /// [generateLayout] builds the layout grid from them.
   factory CrosswordPuzzle.demo() {
     const size = 9;
-    //            0    1    2    3    4    5    6    7    8
-    final layout = [
-      'FLUTTER..', // row 0
-      'L..A.....', // row 1
-      'A..B.....', // row 2
-      'WORDBASE.', // row 3
-      'S..E.....', // row 4
-      '...CLUE..', // row 5
-      '.........', // row 6  (all blocks)
-      'VOCAB....', // row 7
-      'O........', // row 8
+
+    final across = [
+      ClueEntry(word: 'FLUTTER',  clue: "Placing a bet (Aus. slang)",             startRow: 0, startCol: 0),
+      ClueEntry(word: 'WORDBASE', clue: 'Your personal vocabulary store',  startRow: 3, startCol: 0),
+      ClueEntry(word: 'RAGE',     clue: 'Fit of anger', startRow: 5, startCol: 3),
+      ClueEntry(word: 'FIELD',    clue: 'Answer a question',            startRow: 7, startCol: 0),
     ];
+
+    final down = [
+      ClueEntry(word: 'FLAWS', clue: 'Imperfections or defects', startRow: 0, startCol: 0),
+      ClueEntry(word: 'TINDER', clue: 'A popular dating app',   startRow: 0, startCol: 3),
+      ClueEntry(word: 'FI',    clue: 'Fidelity (abbr.)',       startRow: 7, startCol: 0),
+    ];
+
+    final (:layout, :clueTexts) = generateLayout(
+      size: size,
+      across: across,
+      down: down,
+    );
 
     final grid = <List<CrosswordCell>>[];
     for (int r = 0; r < size; r++) {
@@ -355,7 +434,7 @@ class CrosswordPuzzle {
             }
             acrossClues.add(CrosswordClue(
               number: clueNum,
-              text: 'Across clue $clueNum',
+              text: clueTexts[(r, c, ClueDirection.across)] ?? '',
               direction: ClueDirection.across,
               startRow: r,
               startCol: c,
@@ -369,7 +448,7 @@ class CrosswordPuzzle {
             }
             downClues.add(CrosswordClue(
               number: clueNum,
-              text: 'Down clue $clueNum',
+              text: clueTexts[(r, c, ClueDirection.down)] ?? '',
               direction: ClueDirection.down,
               startRow: r,
               startCol: c,
