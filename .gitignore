@@ -67,5 +67,11 @@ pubspec.lock
 amplify_outputs.json
 amplify_outputs.dart
 
+# Backend (Node.js / Amplify Gen 2)
+backend/node_modules/
+backend/.amplify/
+backend/cdk.out/
+backend/.env
+
 # Secrets
 .env

@@ -1,0 +1,14 @@
+services:
+  amplify:
+    build: .
+    volumes:
+      # Mount source for live changes (hot-reload)
+      - .:/app
+      # Prevent container's node_modules from being overwritten by host mount
+      - /app/node_modules
+      # Mount AWS credentials for sandbox deployment
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+    stdin_open: true
+    tty: true
