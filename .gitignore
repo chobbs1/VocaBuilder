@@ -64,7 +64,7 @@ pubspec.lock
 *.freezed.dart
 
 # AWS Amplify
-amplify_outputs.json
+backend/amplify_outputs.json
 amplify_outputs.dart
 
 # Backend (Node.js / Amplify Gen 2)

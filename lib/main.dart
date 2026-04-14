@@ -22,7 +22,7 @@ Future<void> _configureAmplify() async {
     await Amplify.addPlugins([api]);
 
     // Load the amplify_outputs.json from the app assets.
-    final jsonString = await rootBundle.loadString('amplify_outputs.json');
+    final jsonString = await rootBundle.loadString('backend/amplify_outputs.json');
     final config = jsonDecode(jsonString) as Map<String, dynamic>;
     await Amplify.configure(jsonEncode(config));
 

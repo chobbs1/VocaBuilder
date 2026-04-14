@@ -59,7 +59,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - amplify_outputs.json
+    - backend/amplify_outputs.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
