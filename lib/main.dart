@@ -60,7 +60,7 @@ class _VocaBuilderAppState extends State<VocaBuilderApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/word-capture': (context) => MainShell(wordBase: _wordBase),
+        '/word-base': (context) => MainShell(wordBase: _wordBase),
       },
     );
   }

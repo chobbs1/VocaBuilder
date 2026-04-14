@@ -125,11 +125,11 @@ class _PlayCrosswordPageState extends State<PlayCrosswordPage> {
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop(); // close dialog
-              // Navigate back to Capture Word (index 0 of MainShell).
+              // Navigate back to WordBase (index 0 of MainShell).
               // The MainShell is the parent, so we pop to it or
               // use the bottom nav. Simplest: pop to root.
               Navigator.of(this.context).popUntil((route) => route.isFirst);
-              Navigator.of(this.context).pushReplacementNamed('/word-capture');
+              Navigator.of(this.context).pushReplacementNamed('/word-base');
             },
             child: const Text('Back to WordBase'),
           ),

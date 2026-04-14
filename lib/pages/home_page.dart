@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Placeholder home page — navigated to after login.
 /// This will be replaced with the real page flow
-/// (Capture Vocab, Spaced Repetition, Crossword).
+/// (WordBase, Spaced Repetition, Crossword).
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 

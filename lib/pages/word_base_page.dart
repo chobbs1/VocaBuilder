@@ -3,7 +3,7 @@ import '../models/word_entry.dart';
 import '../models/word_base.dart';
 import '../services/api_service.dart';
 
-/// Word Capture page — allows the user to add a new word to their WordBase.
+/// WordBase page — allows the user to add a new word to their WordBase.
 ///
 /// Per 0002-initial-architecture:
 ///   "Capture Vocab Page: Allows you to implement a new word into the WordBase"
@@ -15,16 +15,16 @@ import '../services/api_service.dart';
 /// Fields NOT entered by the user (populated later by backend/API):
 ///   - Definition — will come from a dictionary database
 ///   - Crossword clues — will be generated/fetched
-class WordCapturePage extends StatefulWidget {
+class WordBasePage extends StatefulWidget {
   final WordBase wordBase;
 
-  const WordCapturePage({super.key, required this.wordBase});
+  const WordBasePage({super.key, required this.wordBase});
 
   @override
-  State<WordCapturePage> createState() => _WordCapturePageState();
+  State<WordBasePage> createState() => _WordBasePageState();
 }
 
-class _WordCapturePageState extends State<WordCapturePage> {
+class _WordBasePageState extends State<WordBasePage> {
   final _formKey = GlobalKey<FormState>();
   final _wordController = TextEditingController();
   final _associationsController = TextEditingController();
@@ -108,7 +108,7 @@ class _WordCapturePageState extends State<WordCapturePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Capture Word'),
+        title: const Text('Add to WordBase'),
       ),
       body: Column(
         children: [
@@ -126,7 +126,7 @@ class _WordCapturePageState extends State<WordCapturePage> {
                     textCapitalization: TextCapitalization.none,
                     textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
-                      labelText: 'Word',
+                      labelText: 'Add a new word',
                       hintText: 'Enter a word',
                       prefixIcon: Icon(Icons.spellcheck),
                       border: OutlineInputBorder(),
@@ -150,9 +150,9 @@ class _WordCapturePageState extends State<WordCapturePage> {
                     maxLines: 3,
                     onFieldSubmitted: (_) => _handleSubmit(),
                     decoration: const InputDecoration(
-                      labelText: 'Associations (optional)',
+                      labelText: 'Add Associations',
                       hintText:
-                          'What do you associate with this word?',
+                          'How did you come across this word?',
                       prefixIcon: Icon(Icons.lightbulb_outline),
                       border: OutlineInputBorder(),
                       alignLabelWithHint: true,

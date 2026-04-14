@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../models/word_base.dart';
-import 'word_capture_page.dart';
+import 'word_base_page.dart';
 import 'play_crossword_page.dart';
 import 'spaced_repetition_page.dart';
 
 /// Main navigation shell — displayed after login.
 ///
 /// Hosts a [BottomNavigationBar] with tabs for:
-///   0 – Capture Word  (landing / default)
+///   0 – WordBase  (landing / default)
 ///   1 – Play Crossword
 ///   2 – Spaced Repetition
 ///
@@ -23,7 +23,7 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0; // 0 = Capture Word (default landing page)
+  int _currentIndex = 0; // 0 = WordBase (default landing page)
 
   late final List<Widget> _pages;
 
@@ -31,7 +31,7 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _pages = [
-      WordCapturePage(wordBase: widget.wordBase),
+      WordBasePage(wordBase: widget.wordBase),
       const PlayCrosswordPage(),
       const SpacedRepetitionPage(),
     ];
@@ -51,7 +51,7 @@ class _MainShellState extends State<MainShell> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.edit_note),
-            label: 'Capture Word',
+            label: 'WordBase',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.grid_on),

@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      Navigator.pushReplacementNamed(context, '/word-capture');
+      Navigator.pushReplacementNamed(context, '/word-base');
     });
   }
 
